@@ -10,11 +10,12 @@
 - [📥 下載範例文件 (範例Word.docx)](samples/範例Word.docx)
 
 <div align="center">
-  <img src="docs/images/1.jpg" width="48%" alt="Cover & Header" />
-  <img src="docs/images/2.jpg" width="48%" alt="Chat Dialogues" />
+  <img src="docs/images/1.jpg" width="32%" alt="Cover & Header" />
+  <img src="docs/images/2.jpg" width="32%" alt="Chat Dialogues" />
+  <img src="docs/images/3.jpg" width="32%" alt="Callouts & Styles" />
   <br/>
-  <img src="docs/images/3.jpg" width="48%" alt="Callouts & Styles" />
   <img src="docs/images/4.jpg" width="48%" alt="Code Blocks" />
+  <img src="docs/images/5.jpg" width="48%" alt="Tables & Lists" />
 </div>
 *(實際 Word 輸出效果截圖)*
 
