@@ -7,9 +7,10 @@ const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
+    // Vercel 環境用 '/'，GitHub Pages 用 '/MD2DOC-Evolution/'
+    const isVercel = process.env.VERCEL === '1';
     return {
-      // 改用相對路徑，增加部署靈活性
-      base: '/',
+      base: isVercel ? '/' : '/MD2DOC-Evolution/',
       server: {
         port: 3000,
         host: '0.0.0.0',
