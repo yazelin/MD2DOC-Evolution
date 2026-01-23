@@ -1,0 +1,59 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每天 UTC 00:00 (台灣時間 08:00) 執行
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/eric861129/MD2DOC-Evolution.git
+
+      - name: Fetch upstream
+        run: git fetch upstream
+
+      - name: Check for updates
+        id: check
+        run: |
+          UPSTREAM_COMMITS=$(git rev-list HEAD..upstream/main --count)
+          echo "commits=$UPSTREAM_COMMITS" >> $GITHUB_OUTPUT
+          if [ "$UPSTREAM_COMMITS" -gt 0 ]; then
+            echo "有 $UPSTREAM_COMMITS 個新的 commit"
+          else
+            echo "沒有新的更新"
+          fi
+
+      - name: Create sync branch and PR
+        if: steps.check.outputs.commits > 0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="sync-upstream-$(date +%Y%m%d)"
+          git checkout -b $BRANCH_NAME
+          git merge upstream/main --no-edit
+          git push origin $BRANCH_NAME
+          gh pr create \
+            --title "🔄 Sync with upstream $(date +%Y-%m-%d)" \
+            --body "自動同步上游更新。
+
+          ## 更新內容
+          包含上游 ${{ steps.check.outputs.commits }} 個新的 commit。
+
+          請檢查後合併。" \
+            --base main \
+            --head $BRANCH_NAME
