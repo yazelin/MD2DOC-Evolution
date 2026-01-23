@@ -72,7 +72,7 @@ export const registerDefaultHandlers = () => {
   docxRegistry.register(BlockType.BULLET_LIST, async (block, config) => 
     new Paragraph({ 
       children: await parseInlineStyles(block.content, config), 
-      bullet: { level: block.nestingLevel || 0 }, 
+      numbering: { reference: "default-bullet", level: block.nestingLevel || 0 }, 
       spacing: SPACING.LIST 
     })
   );

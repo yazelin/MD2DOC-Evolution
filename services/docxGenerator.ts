@@ -84,10 +84,24 @@ export const generateDocx = async (
     title: docMeta.title,
     description: docMeta.subject,
     numbering: {
-      config: [{
-        reference: "default-numbering",
-        levels: [{ level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.LEFT }],
-      }],
+      config: [
+        {
+          reference: "default-numbering",
+          levels: [
+            { level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 720, hanging: 360 } } } },
+            { level: 1, format: "decimal", text: "%2.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 1440, hanging: 360 } } } },
+            { level: 2, format: "decimal", text: "%3.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 2160, hanging: 360 } } } },
+          ],
+        },
+        {
+          reference: "default-bullet",
+          levels: [
+            { level: 0, format: "bullet", text: "●", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 720, hanging: 360 } } } },
+            { level: 1, format: "bullet", text: "○", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 1440, hanging: 360 } } } },
+            { level: 2, format: "bullet", text: "■", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 2160, hanging: 360 } } } },
+          ],
+        },
+      ],
     },
     sections: [{
       properties: {
