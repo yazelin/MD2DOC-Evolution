@@ -76,11 +76,12 @@ export const useShareToken = (options: UseShareTokenOptions) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('[MD2DOC] 成功載入分享內容');
+        console.log('[MD2DOC] 成功載入分享內容', data);
 
-        // 載入內容
-        if (data.content) {
-          onLoadContent(data.content, data.filename);
+        // 載入內容（API 回應結構：{ type, data: { content, filename }, ... }）
+        const contentData = data.data || data;
+        if (contentData.content) {
+          onLoadContent(contentData.content, contentData.filename);
         }
 
         // 關閉對話框
