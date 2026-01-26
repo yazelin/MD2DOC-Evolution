@@ -4,6 +4,7 @@ import { parseMarkdown } from '../services/markdownParser';
 import { ParsedBlock, DocumentMeta } from '../services/types';
 import { INITIAL_CONTENT_ZH, INITIAL_CONTENT_EN } from '../constants/defaultContent';
 import { useCTOSMessage } from './useCTOSMessage';
+import { useShareToken } from './useShareToken';
 
 export const useEditorState = () => {
   const { t, i18n } = useTranslation();
@@ -35,6 +36,19 @@ export const useEditorState = () => {
   useCTOSMessage({
     appId: 'md2doc',
     onLoadFile: handleCTOSLoadFile
+  });
+
+  // ShareToken Integration (載入分享連結內容)
+  const handleShareTokenLoadContent = useCallback((fileContent: string, filename?: string) => {
+    console.log('[MD2DOC] 載入分享內容:', filename);
+    setContent(fileContent);
+    // 清除 localStorage 草稿
+    localStorage.removeItem('draft_content');
+    setImageRegistry({});
+  }, []);
+
+  const shareTokenState = useShareToken({
+    onLoadContent: handleShareTokenLoadContent
   });
 
   // Parsing & Auto-save (Debounced)
@@ -84,6 +98,8 @@ export const useEditorState = () => {
     language,
     toggleLanguage,
     resetToDefault,
-    t // Export translation helper if needed
+    t, // Export translation helper if needed
+    // ShareToken State (for password dialog)
+    shareTokenState
   };
 };

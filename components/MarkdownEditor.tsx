@@ -14,6 +14,7 @@ import { EditorHeader } from './editor/EditorHeader';
 import { QuickActionSidebar } from './editor/QuickActionSidebar';
 import { EditorPane } from './editor/EditorPane';
 import { PreviewPane } from './editor/PreviewPane';
+import { ShareTokenDialog } from './common/ShareTokenDialog';
 import Footer from './Footer';
 
 const MarkdownEditor: React.FC = () => {
@@ -30,6 +31,7 @@ const MarkdownEditor: React.FC = () => {
     textareaRef,
     previewRef,
     handleScroll,
+    shareTokenState,
   } = editorState;
 
   const startResizing = React.useCallback(() => {
@@ -104,6 +106,20 @@ const MarkdownEditor: React.FC = () => {
         </main>
         
         <Footer />
+
+        {/* ShareToken Password Dialog */}
+        {shareTokenState && (
+          <ShareTokenDialog
+            isOpen={shareTokenState.showPasswordDialog}
+            isLoading={shareTokenState.isLoading}
+            error={shareTokenState.error}
+            password={shareTokenState.password}
+            attempts={shareTokenState.attempts}
+            onPasswordChange={shareTokenState.setPassword}
+            onSubmit={shareTokenState.submitPassword}
+            onClose={shareTokenState.closeDialog}
+          />
+        )}
       </div>
     </EditorProvider>
   );

@@ -30,7 +30,8 @@ export const useMarkdownEditor = () => {
     language,
     toggleLanguage,
     resetToDefault,
-    t
+    t,
+    shareTokenState
   } = useEditorState();
 
   // 2. Computed Metrics (Word Count)
@@ -76,6 +77,9 @@ export const useMarkdownEditor = () => {
     
     // Helpers/Constants
     t,
-    pageSizes
+    pageSizes,
+
+    // ShareToken State (for password dialog)
+    shareTokenState
   };
 };
