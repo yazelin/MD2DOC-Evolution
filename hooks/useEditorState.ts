@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { parseMarkdown } from '../services/markdownParser';
 import { ParsedBlock, DocumentMeta } from '../services/types';
 import { INITIAL_CONTENT_ZH, INITIAL_CONTENT_EN } from '../constants/defaultContent';
+import { useCTOSMessage } from './useCTOSMessage';
 
 export const useEditorState = () => {
   const { t, i18n } = useTranslation();
@@ -21,6 +22,20 @@ export const useEditorState = () => {
   const registerImage = (id: string, base64: string) => {
     setImageRegistry(prev => ({ ...prev, [id]: base64 }));
   };
+
+  // CTOS PostMessage Integration
+  const handleCTOSLoadFile = useCallback((filename: string, fileContent: string) => {
+    console.log('[MD2DOC] 載入 CTOS 檔案:', filename);
+    setContent(fileContent);
+    // 清除 localStorage 草稿，避免下次開啟時載入舊內容
+    localStorage.removeItem('draft_content');
+    setImageRegistry({});
+  }, []);
+
+  useCTOSMessage({
+    appId: 'md2doc',
+    onLoadFile: handleCTOSLoadFile
+  });
 
   // Parsing & Auto-save (Debounced)
   useEffect(() => {
