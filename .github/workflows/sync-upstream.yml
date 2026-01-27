@@ -52,6 +52,7 @@ jobs:
           git checkout -b $BRANCH_NAME
           git merge upstream/main --no-edit
           git push origin $BRANCH_NAME
+          sleep 5  # 等待 GitHub 同步
           gh pr create \
             --title "🔄 Sync with upstream $(date +%Y-%m-%d)" \
             --body "自動同步上游更新。
