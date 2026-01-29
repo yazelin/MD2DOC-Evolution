@@ -41,8 +41,47 @@ jobs:
             echo "沒有新的更新"
           fi
 
-      - name: Merge upstream and push
+      - name: Setup Node.js
         if: steps.check.outputs.commits > 0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Merge upstream
+        if: steps.check.outputs.commits > 0
+        run: git merge upstream/main --no-edit
+
+      - name: Build verification
+        if: steps.check.outputs.commits > 0
+        id: build
         run: |
+          npm ci
+          npm run build
+        continue-on-error: true
+
+      - name: Push if build passed
+        if: steps.check.outputs.commits > 0 && steps.build.outcome == 'success'
+        run: git push origin main
+
+      - name: Revert and create PR if build failed
+        if: steps.check.outputs.commits > 0 && steps.build.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          git reset --hard HEAD~1
+          BRANCH_NAME="sync-upstream-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b $BRANCH_NAME
           git merge upstream/main --no-edit
-          git push origin main
+          git push origin $BRANCH_NAME
+          sleep 15
+          curl -f -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/yazelin/MD2DOC-Evolution/pulls \
+            -d "$(jq -n \
+              --arg title "⚠️ Upstream sync failed build - $(date +%Y-%m-%d)" \
+              --arg body "自動同步上游更新後 build 失敗，需要手動檢查。\n\n## 更新內容\n包含上游 ${{ steps.check.outputs.commits }} 個新的 commit。\n\n⚠️ **npm run build 失敗，請手動修復後合併。**" \
+              --arg head "$BRANCH_NAME" \
+              --arg base "main" \
+              '{title: $title, body: $body, head: $head, base: $base}')"
