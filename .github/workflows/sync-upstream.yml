@@ -50,24 +50,15 @@ jobs:
           git checkout -b $BRANCH_NAME
           git merge upstream/main --no-edit
           git push origin $BRANCH_NAME
-          # 等待 GitHub 完全同步分支資訊
-          for i in 1 2 3 4 5; do
-            sleep 10
-            echo "嘗試建立 PR (第 $i 次)..."
-            if gh pr create \
-              --title "🔄 Sync with upstream $(date +%Y-%m-%d)" \
-              --body "自動同步上游更新。
-
-          ## 更新內容
-          包含上游 ${{ steps.check.outputs.commits }} 個新的 commit。
-
-          請檢查後合併。" \
-              --base main \
-              --head $BRANCH_NAME; then
-              echo "PR 建立成功"
-              exit 0
-            fi
-            echo "第 $i 次失敗，等待後重試..."
-          done
-          echo "PR 建立失敗，已重試 5 次"
-          exit 1
+          # 使用 REST API 建立 PR（避免 GraphQL 的 stale ref 問題）
+          sleep 15
+          curl -f -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/yazelin/MD2DOC-Evolution/pulls \
+            -d "$(jq -n \
+              --arg title "🔄 Sync with upstream $(date +%Y-%m-%d)" \
+              --arg body "自動同步上游更新。\n\n## 更新內容\n包含上游 ${{ steps.check.outputs.commits }} 個新的 commit。\n\n請檢查後合併。" \
+              --arg head "$BRANCH_NAME" \
+              --arg base "main" \
+              '{title: $title, body: $body, head: $head, base: $base}')"
