@@ -41,24 +41,8 @@ jobs:
             echo "沒有新的更新"
           fi
 
-      - name: Create sync branch and PR
+      - name: Merge upstream and push
         if: steps.check.outputs.commits > 0
-        env:
-          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
-          BRANCH_NAME="sync-upstream-$(date +%Y%m%d-%H%M%S)"
-          git checkout -b $BRANCH_NAME
           git merge upstream/main --no-edit
-          git push origin $BRANCH_NAME
-          # 使用 REST API 建立 PR（避免 GraphQL 的 stale ref 問題）
-          sleep 15
-          curl -f -X POST \
-            -H "Authorization: token $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/yazelin/MD2DOC-Evolution/pulls \
-            -d "$(jq -n \
-              --arg title "🔄 Sync with upstream $(date +%Y-%m-%d)" \
-              --arg body "自動同步上游更新。\n\n## 更新內容\n包含上游 ${{ steps.check.outputs.commits }} 個新的 commit。\n\n請檢查後合併。" \
-              --arg head "$BRANCH_NAME" \
-              --arg base "main" \
-              '{title: $title, body: $body, head: $head, base: $base}')"
+          git push origin main
